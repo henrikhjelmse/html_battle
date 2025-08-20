@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HTML Layout Guesser{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background: #18191c; color: #e0e0e0; font-family: 'Segoe UI', 'Fira Mono', 'Consolas', 'Courier New', monospace; margin: 0; padding: 0; width: 100vw; min-height: 100vh;">
+    <!-- Admin-knappar överst om inloggad (flask_login) -->
+    {% if current_user.is_authenticated %}
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin: 24px 32px 0 0;">
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">Admin-panel</a>
+            <a href="{{ url_for('upload_file') }}" class="btn btn-secondary">Ladda upp layout</a>
+            {% if current_user.is_superadmin %}
+                <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">Adminhantering</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logga ut ({{ current_user.username }})</a>
+        </div>
+    {% else %}
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin: 24px 32px 0 0;">
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Logga in som Admin</a>
+        </div>
+    {% endif %}
+    {% block page_title %}{% endblock %}
+    {% block page_description %}{% endblock %}
+
+    <main style="width: 100vw; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+        {% block content %}{% endblock %}
+    </main>
+    {% if request.path != '/' %}
+        <div style="text-align: center; margin: 40px 0 0 0; width: 100vw;">
+            <a href="/" class="btn btn-secondary">← Tillbaka till start</a>
+        </div>
+    {% endif %}
+</body>
+</html>

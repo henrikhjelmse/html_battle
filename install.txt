@@ -1,0 +1,43 @@
+
+# Installationsguide för gissa_html (Windows)
+
+Följ dessa steg för att snabbt komma igång med projektet:
+
+## 1. Kontrollera att Python är installerat
+Öppna Kommandotolken (cmd) eller PowerShell och skriv:
+
+   python --version
+
+Om du får ett versionsnummer (t.ex. Python 3.10.0) kan du gå vidare. Om inte, ladda ner och installera Python 3 från https://python.org.
+
+## 2. Skapa och aktivera ett virtuellt Python-miljö (rekommenderas)
+I projektmappen kör:
+
+   python -m venv venv
+   .\venv\Scripts\activate
+
+Om du ser (venv) i början av raden är miljön aktiverad.
+
+## 3. Installera alla nödvändiga paket
+
+   pip install -r requirements.txt
+
+## 4. Starta servern
+
+   python app.py
+
+Om allt fungerar ser du något i stil med:
+   * Running on http://0.0.0.0:5000
+
+## 5. Öppna webbläsaren
+
+Gå till http://localhost:5000
+
+---
+
+### Vanliga problem
+- Om du får fel om saknade paket, kontrollera att du aktiverat venv och kört pip install.
+- Om port 5000 är upptagen, ändra porten i slutet av app.py.
+- Om du vill installera om alla paket, ta bort venv-mappen och börja om från steg 2.
+
+Lycka till!

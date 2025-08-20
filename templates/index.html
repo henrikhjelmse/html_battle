@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="width: 100vw; min-height: 100vh; margin: 0; padding: 0; background: #18191c; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+    <section style="width: 100%; max-width: 1600px; margin-top: 40px; background: #23272a; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 40px 32px;">
+        <h2 style="text-align: center; color: #43b581; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-size: 2em; margin-bottom: 36px; letter-spacing: 1px;">Välj en layout att gissa på</h2>
+        <p style="text-align: center; color: #b9bbbe; font-size: 1.1em; margin-bottom: 32px;">Klicka på en layout för att se bilden och gissa HTML-koden.</p>
+        {% if layouts %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 38px; margin-top: 18px;">
+            {% for layout_id in layouts %}
+            <a href="{{ url_for('show_layout', layout_id=layout_id) }}" style="text-decoration: none;">
+                <div style="background: #18191c; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 32px 18px 24px 18px; display: flex; flex-direction: column; align-items: center; transition: transform 0.18s, box-shadow 0.18s; border: 1px solid #36393f; position: relative; cursor: pointer;"
+                     onmouseover="this.style.transform='scale(1.06)'; this.style.boxShadow='0 8px 32px rgba(67,181,129,0.18)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)';">
+                    <img src="{{ url_for('static', filename='layouts/' + layout_id|string + '.jpg') }}" alt="Layout {{ layout_id }}" style="width: 100%; max-width: 200px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); margin-bottom: 22px;">
+                    <div style="color: #7289da; font-size: 1.18em; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-weight: 600; letter-spacing: 1px;">Layout {{ layout_id }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p style="text-align: center; color: #b9bbbe;">Inga layouter tillgängliga. <a href="{{ url_for('upload_file') }}">Ladda upp några bilder först</a>.</p>
+        {% endif %}
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{{ url_for('random_layout') }}" class="btn">🎲 Slumpmässig layout</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

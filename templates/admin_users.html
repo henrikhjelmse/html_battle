@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Adminhantering{% endblock %}
+{% block content %}
+<div style="max-width: 700px; margin: 40px auto; background: #23272a; color: #e0e0e0; border-radius: 16px; padding: 32px;">
+    <h2>Adminhantering</h2>
+    {% if error %}<div style="color: #ff5555; margin-bottom: 12px;">{{ error }}</div>{% endif %}
+    {% if success %}<div style="color: #43b581; margin-bottom: 12px;">{{ success }}</div>{% endif %}
+    <h3>Lägg till ny admin</h3>
+    <form method="post" style="margin-bottom: 32px;">
+        <input type="hidden" name="action" value="add">
+        <input type="text" name="username" placeholder="Användarnamn" required style="margin-right: 8px;">
+        <input type="password" name="password" placeholder="Lösenord" required style="margin-right: 8px;">
+        <select name="rank">
+            <option value="admin">admin</option>
+            <option value="superadmin">superadmin</option>
+        </select>
+        <button type="submit" class="btn btn-secondary">Lägg till</button>
+    </form>
+    <h3>Befintliga admins</h3>
+    <table style="width:100%; background:#18191c; border-radius:8px;">
+        <tr><th style="text-align:left;">Användarnamn</th><th>Rank</th><th>Byt rank/lösenord</th></tr>
+        {% for admin in admins %}
+        <tr>
+            <td>{{ admin.username }}</td>
+            <td>{{ admin.rank }}</td>
+            <td>
+                <form method="post" style="display:inline;">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="username" value="{{ admin.username }}">
+                    <select name="rank">
+                        <option value="admin" {% if admin.rank == 'admin' %}selected{% endif %}>admin</option>
+                        <option value="superadmin" {% if admin.rank == 'superadmin' %}selected{% endif %}>superadmin</option>
+                    </select>
+                    <input type="password" name="password" placeholder="Nytt lösenord (valfritt)">
+                    <button type="submit" class="btn btn-secondary">Spara</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Ladda upp layout - HTML Guesser{% endblock %}
+
+
+
+{% block content %}
+<div class="card">
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    
+    {% if success %}
+        <div class="success">{{ success }}</div>
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data">
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Layout-nummer:</label>
+            <span style="font-weight: bold; color: #667eea;">Nästa nummer: {{ next_layout_number }}</span>
+            <small style="color: #666; margin-left: 10px;">Numret sätts automatiskt</small>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="file" style="display: block; margin-bottom: 5px; font-weight: bold;">Välj bildfil:</label>
+            <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.gif" required
+                   style="padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+            <small style="color: #666; display: block; margin-top: 5px;">Accepterade format: JPG, PNG, GIF</small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="hint" style="display: block; margin-bottom: 5px; font-weight: bold;">Ledtråd (valfritt):</label>
+            <input type="text" id="hint" name="hint" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: 'Courier New', monospace;">
+            <small style="color: #666; display: block; margin-top: 5px;">En kort ledtråd till de som ska gissa</small>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label for="correct_html" style="display: block; margin-bottom: 5px; font-weight: bold;">Rätt HTML-kod:</label>
+            <textarea id="correct_html" name="correct_html" required style="width: 100%; height: 150px; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: 'Courier New', monospace;"></textarea>
+            <small style="color: #666; display: block; margin-top: 5px;">Skriv den HTML-kod som är rätt för denna layout</small>
+        </div>
+        
+        <button type="submit" class="btn">📤 Ladda upp layout</button>
+    </form>
+    
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <h3>Instruktioner:</h3>
+        <ol style="margin-left: 20px; line-height: 1.6;">
+            <li>Välj ett unikt nummer för din layout</li>
+            <li>Ladda upp en bild som visar den layout användare ska gissa</li>
+            <li>Bilden sparas som "[nummer].jpg" i systemet</li>
+            <li>Du behöver också uppdatera Python-koden för att lägga till rätt HTML-svar för denna layout</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

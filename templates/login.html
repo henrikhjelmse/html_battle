@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - HTML Guesser{% endblock %}
+{% block page_title %}Admin Login{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 0 auto;">
+    <h2>Admin Login</h2>
+    {% if already_logged_in %}
+        <div class="success" style="margin-bottom: 20px;">Du är redan inloggad som <b>{{ session.admin_username }}</b>.</div>
+        <a href="{{ url_for('logout') }}" class="btn">Logga ut</a>
+    {% else %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="post">
+            <div style="margin-bottom: 20px;">
+                <label for="username" style="display: block; margin-bottom: 5px; font-weight: bold;">Användarnamn:</label>
+                <input type="text" id="username" name="username" required style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label for="password" style="display: block; margin-bottom: 5px; font-weight: bold;">Lösenord:</label>
+                <input type="password" id="password" name="password" required style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+            </div>
+            <button type="submit" class="btn">Logga in</button>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

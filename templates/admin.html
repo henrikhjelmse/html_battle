@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Admin - Hantera uppladdningar{% endblock %}
+
+{% block content %}
+<div style="width: 100vw; min-height: 100vh; margin: 0; padding: 0; background: #18191c; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+    <section style="width: 100%; max-width: 1600px; margin-top: 40px; background: #23272a; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 40px 32px;">
+        <h2 style="color: #43b581; font-size: 2em; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; margin-bottom: 28px; text-align: center;">Uppladdade layouter</h2>
+        {% if success %}
+            <div class="success" style="margin-bottom: 18px;">{{ success }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="error" style="margin-bottom: 18px;">{{ error }}</div>
+        {% endif %}
+    {% if session.admin_rank == 'superadmin' %}
+    <div style="margin-bottom: 18px;">
+        <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">Adminhantering</a>
+    </div>
+    {% endif %}
+        <div style="overflow-x: auto;">
+            <table style="width:100%; margin-bottom:20px; border-collapse: separate; border-spacing: 0; background: #23272a;">
+                <tr style="background: #18191c; color: #b9bbbe;">
+
+                    <th style="padding: 12px 8px; font-size: 1em;">Bild</th>
+                    <th style="padding: 12px 8px; font-size: 1em;">Ledtråd</th>
+                    <th style="padding: 12px 8px; font-size: 1em;">HTML-svar</th>
+                    <th style="padding: 12px 8px; font-size: 1em;"> </th>
+                </tr>
+                {% for layout in all_layouts %}
+                {% set layout_id = layout.id %}
+                <tr style="border-bottom: 1px solid #36393f; transition: background 0.2s;" onmouseover="this.style.background='#23272e'" onmouseout="this.style.background=''">
+                    <td style="padding: 10px 8px; text-align:center; min-width:220px; max-width:520px;">
+                        <img src="{{ url_for('static', filename='layouts/' + layout_id|string + '.jpg') }}" alt="Layout {{ layout_id }}" class="layout-thumb" style="border-radius: 14px; max-width: 500px; max-height: 500px; box-shadow:0 4px 16px rgba(0,0,0,0.18); object-fit:contain; background:#222;">
+                    </td>
+                    <td style="padding: 10px 24px 10px 8px; min-width:120px; max-width:220px;">
+                        {% if session.admin_rank == 'superadmin' or layout.made_by == session.admin_username %}
+                        <form method="post" action="{{ url_for('admin_edit') }}" style="margin-bottom:0; width:100%;">
+                            <input type="hidden" name="layout_id" value="{{ layout_id }}">
+                            <textarea name="new_hint" id="hint_{{ layout_id }}" style="width:100%;min-height:500px;max-height:1000px;padding:7px 10px;margin-bottom:0;background:#222;color:#e0e0e0;border:none;border-radius:6px;font-family:'Fira Mono','Consolas','Courier New',monospace;font-size:15px;resize:vertical;overflow:auto;">{{ correct_hint[layout_id] if correct_hint and layout_id in correct_hint else '' }}</textarea>
+                    </td>
+                    <td style="padding: 10px 8px 10px 24px; min-width:220px; max-width:400px;">
+                            <textarea id="html_{{ layout_id }}" name="new_html" style="width:100%;min-height:500px;max-height:1000px;padding:8px;background:#18191c;color:#e0e0e0;border:none;border-radius:8px;font-family:'Fira Mono','Consolas','Courier New',monospace;font-size:15px;resize:vertical;box-shadow:0 1px 4px rgba(0,0,0,0.12);outline:none;overflow:auto;">{{ correct_html[layout_id] }}</textarea>
+                    </td>
+                    <td style="padding: 10px 8px; text-align:center; vertical-align:top;">
+                        <div style="color:#b9bbbe; font-size:0.98em; margin-bottom:2px;">Skapare: {{ layout.made_by if layout.made_by else '-' }}</div>
+                        <div style="color:#43b581; font-size:0.97em; margin-bottom:8px;">Nr: {{ layout_id }}</div>
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                            <button type="submit" class="btn" style="width:100%; max-width:320px;">Spara</button>
+                        </form>
+                            <form method="post" action="{{ url_for('admin_delete') }}" style="width:100%; max-width:320px;">
+                                <input type="hidden" name="layout_id" value="{{ layout_id }}">
+                                <button type="submit" class="btn btn-secondary" style="width:100%;" onclick="return confirm('Ta bort layout {{ layout_id }}?');">Ta bort</button>
+                            </form>
+                        </div>
+                    </td>
+                    {% else %}
+                    <td style="padding: 10px 8px; min-width:120px; max-width:220px;">
+                        <textarea readonly style="width:100%;min-height:500px;max-height:1000px;padding:7px 10px;margin-bottom:0;background:#222;color:#aaa;border:none;border-radius:6px;font-family:'Fira Mono','Consolas','Courier New',monospace;font-size:15px;resize:vertical;overflow:auto;">{{ correct_hint[layout_id] if correct_hint and layout_id in correct_hint else '' }}</textarea>
+                    </td>
+                    <td style="padding: 10px 8px; min-width:220px; max-width:400px;">
+                        <textarea readonly style="width:100%;min-height:500px;max-height:1000px;padding:8px;background:#18191c;color:#aaa;border:none;border-radius:8px;font-family:'Fira Mono','Consolas','Courier New',monospace;font-size:15px;resize:vertical;box-shadow:0 1px 4px rgba(0,0,0,0.12);outline:none;overflow:auto;">{{ correct_html[layout_id] }}</textarea>
+                    </td>
+                    <td style="padding: 10px 8px; text-align:center; vertical-align:top;">
+                        <div style="color:#b9bbbe; font-size:0.98em; margin-bottom:8px;">Skapare: {{ layout.made_by if layout.made_by else '-' }}</div>
+                        <form method="post" action="{{ url_for('admin_delete') }}" style="width:100%; max-width:320px;">
+                            <input type="hidden" name="layout_id" value="{{ layout_id }}">
+                            <button type="submit" class="btn btn-secondary" style="width:100%;" onclick="return confirm('Ta bort layout {{ layout_id }}?');">Ta bort</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                <tr><td colspan="5" style="padding:0;">
+                    <hr style="margin:8px 0; border-color: #36393f;">
+                </td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

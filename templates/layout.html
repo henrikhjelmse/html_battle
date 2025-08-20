@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Layout {{ layout_id }} - HTML Guesser{% endblock %}
+{% block page_title %}{% endblock %}
+{% block page_description %}{% endblock %}
+
+{% block content %}
+<div style="width: 100%; min-height: 100vh; margin: 0; padding: 0; background: #18191c; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+    <div style="display: flex; flex-wrap: wrap; gap: 40px; width: 100%; max-width: 1800px; margin-top: 40px; justify-content: center;">
+        <!-- Förhandsvisning -->
+        <section style="flex: 1 1 400px; min-width: 340px; max-width: 600px; background: #fff; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); padding: 32px 28px; display: flex; flex-direction: column; align-items: stretch;">
+            <h3 style="color: #7289da; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-size: 1.15em; margin-bottom: 18px; text-align: center;">Din HTML förhandsvisning:</h3>
+            <div id="previewCard" style="background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div id="preview" style="border-radius: 8px; padding: 10px 14px; background: #fff; min-height: 40px; color: #23272a; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-size: 16px; transition: min-height 0.2s;"></div>
+            </div>
+        </section>
+
+        <!-- Layout att efterlikna -->
+        <section style="flex: 1 1 340px; min-width: 280px; max-width: 480px; background: #23272a; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 32px 28px; display: flex; flex-direction: column; align-items: center;">
+            <h3 style="color: #43b581; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-size: 1.1em; margin-bottom: 18px; text-align: center;">Layout att efterlikna:</h3>
+            <img src="{{ url_for('static', filename='layouts/' + layout_id|string + '.jpg') }}" 
+                 alt="Layout {{ layout_id }}" 
+                 class="layout-thumb" style="width: 100%; max-width: 400px; border-radius: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.18); margin-bottom: 18px;">
+            <div style="margin-top: 10px; text-align: center;">
+                {% set idx = available_layouts.index(layout_id) if layout_id in available_layouts else -1 %}
+                {% if idx > 0 %}
+                    <a href="{{ url_for('show_layout', layout_id=available_layouts[idx-1]) }}" class="btn btn-secondary">← Föregående</a>
+                {% endif %}
+                {% if idx < available_layouts|length - 1 and idx != -1 %}
+                    <a href="{{ url_for('show_layout', layout_id=available_layouts[idx+1]) }}" class="btn btn-secondary">Nästa →</a>
+                {% endif %}
+            </div>
+                        <div id="result" style="margin-top: 22px;"></div>
+        </section>
+
+        <!-- Skriv din HTML-kod -->
+        <section style="flex: 1 1 400px; min-width: 340px; max-width: 600px; background: #23272a; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 32px 28px; display: flex; flex-direction: column; align-items: stretch;">
+            <h3 style="margin-bottom: 18px; color: #43b581; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-size: 1.2em; letter-spacing: 1px; text-align: center;">Skriv din HTML-kod:</h3>
+            <div style="background: #18191c; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); border: 1px solid #36393f;">
+                <textarea id="htmlInput" placeholder="Skriv din HTML-kod här..." 
+                    style="width: 100%; height: 340px; padding: 20px; background: #18191c; color: #e0e0e0; border: none; border-radius: 12px; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace; font-size: 16px; resize: vertical; box-shadow: 0 1px 4px rgba(0,0,0,0.18); outline: none;"></textarea>
+            </div>
+            <div style="margin-top: 18px; display: flex; gap: 12px; justify-content: center;">
+                <button onclick="submitGuess()" class="btn">🎯 Kontrollera gissning</button>
+                <button onclick="getTextContent()" class="btn btn-secondary">📋 Hämta texten</button>
+                <button onclick="showHint()" class="btn btn-secondary">💡 Visa ledtråd</button>
+            </div>
+            <pre id="extra"></pre>
+        </section>
+    </div>
+</div>
+
+<style>
+    /* Tabbar styling */
+    .btn.active {
+        background: #43b581 !important;
+        color: #fff !important;
+        border-color: #43b581 !important;
+    }
+
+    .layout-thumb {
+        transition: transform 0.25s cubic-bezier(.4,2,.3,1), box-shadow 0.25s;
+        cursor: pointer;
+    }
+    .layout-thumb:hover {
+        transform: scale(1.3);
+        z-index: 10;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+</style>
+<!-- previewCard flyttad till vänster kolumn ovan -->
+
+<script>
+// Tab-växling
+function switchTab(tab) {
+    const textTab = document.getElementById('textTabContent');
+    const blockTab = document.getElementById('blockTabContent');
+    const btnText = document.getElementById('tabText');
+    const btnBlock = document.getElementById('tabBlock');
+    if (tab === 'text') {
+        textTab.style.display = 'block';
+        blockTab.style.display = 'none';
+        btnText.classList.add('active');
+        btnBlock.classList.remove('active');
+    } else {
+        textTab.style.display = 'none';
+        blockTab.style.display = 'block';
+        btnText.classList.remove('active');
+        btnBlock.classList.add('active');
+    }
+}
+let currentResult = null;
+
+// Gör hint tillgänglig som JS-variabel
+var hint = {{ hint|tojson }};
+
+// Cookie helpers
+function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+    }
+    return null;
+}
+
+// Spara och ladda HTML-input per layout
+const layoutId = {{ layout_id|tojson }};
+const htmlInput = document.getElementById('htmlInput');
+const cookieKey = 'html_guess_' + layoutId;
+
+// Ladda från cookie vid sidladdning och auto-kontrollera om det finns text
+window.addEventListener('DOMContentLoaded', function() {
+    var saved = getCookie(cookieKey);
+    if (saved !== null) {
+        htmlInput.value = saved;
+        updatePreview(saved);
+        if (saved.trim() !== "") {
+            submitGuess();
+        }
+    }
+});
+
+
+// Spara till cookie vid ändring
+htmlInput.addEventListener('input', function() {
+    setCookie(cookieKey, htmlInput.value, 30);
+});
+
+
+// Hämta all text (utan taggar) från det rätta svaret och visa i #extra
+function getTextContent() {
+    const extraDiv = document.getElementById('extra');
+    // layoutId already declared at top
+    fetch(`/api/layout_text/${layoutId}`)
+        .then(resp => resp.ok ? resp.text() : '')
+        .then(text => {
+            if (text.trim() === "") {
+                extraDiv.innerHTML = '';
+                return;
+            }
+            extraDiv.innerHTML = `
+                <div style="margin-top: 16px; background: #23272a; color: #e0e0e0; border-radius: 8px; padding: 14px 18px; font-size: 1.08em; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;">
+                    <div style="font-weight: bold; color: #43b581; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                        <span>Rätt textinnehåll:</span>
+                        <button id="copyPlainTextBtn" type="button" class="btn btn-secondary" style="font-size:0.95em; padding: 2px 10px;">Kopiera</button>
+                    </div>
+                    <pre id="plainTextValue" style="white-space: pre-wrap; word-break: break-word; background: none; color: #e0e0e0; font-family: inherit; font-size: inherit; margin: 0;">${text}</pre>
+                </div>
+            `;
+            // Kopiera-funktion
+            var btn = document.getElementById('copyPlainTextBtn');
+            if (btn) {
+                btn.onclick = function() {
+                    var text = document.getElementById('plainTextValue').textContent;
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(text).then(function() {
+                            btn.textContent = 'Kopierat!';
+                            setTimeout(() => btn.textContent = 'Kopiera', 1200);
+                        });
+                    }
+                };
+            }
+        });
+}
+
+// Visa ledtråd i #extra
+function showHint() {
+    const extraDiv = document.getElementById('extra');
+    // Escape HTML for safe code display
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, function(tag) {
+            const chars = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            };
+            return chars[tag] || tag;
+        });
+    }
+    let html = '';
+    if (hint && hint.trim() !== "") {
+        html += `<div style="margin-top: 16px; background: #23272a; color: #e0e0e0; border-radius: 8px; padding: 14px 18px; font-size: 1.08em; font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;">
+            <span style=\"font-weight: bold; color: #43b581; margin-bottom: 8px; display: block;\">Ledtråd:</span>
+            <pre style=\"background: none; color: #e0e0e0; font-family: inherit; font-size: inherit; margin: 0; white-space: pre-wrap; word-break: break-word;\">${escapeHtml(hint)}</pre>
+        </div>`;
+    } else {
+        html += `<div style=\"margin-top: 16px; color: #e0e0e0;\">Ingen ledtråd finns för denna layout.</div>`;
+    }
+
+    // Hämta taggstatistik från backend och visa enligt önskat format
+    fetch(`/api/layout_tags/${layoutId}`)
+        .then(resp => resp.ok ? resp.json() : {})
+        .then(data => {
+            if (data && data.tags) {
+                html += `<div style='margin-top: 14px; background: #18191c; color: #e0e0e0; border-radius: 8px; padding: 10px 14px; font-size: 1em;'>`;
+                Object.entries(data.tags).forEach(([tag, count]) => {
+                    html += `&lt;${tag}&gt; ${count}st<br>`;
+                });
+                html += `</div>`;
+            }
+            extraDiv.innerHTML = html;
+        });
+}
+
+function submitGuess() {
+    const html = document.getElementById('htmlInput').value;
+    if (!html.trim()) {
+        showResult('Skriv lite HTML-kod först!', 'error');
+        return;
+    }
+    fetch('/submit_guess', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({html: html})
+    })
+    .then(response => response.json())
+    .then(data => {
+        currentResult = data;
+        if (data.error) {
+            showResult(data.error, 'error');
+        } else {
+            showResult(`${data.feedback} Likhet: ${data.similarity}%`, data.status);
+            // Om du vill visa rätt svar, använd getTextContent() eller liknande här
+        }
+        updatePreview(html);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showResult('Ett fel uppstod. Försök igen.', 'error');
+    });
+}
+
+function showResult(message, status) {
+    const resultDiv = document.getElementById('result');
+    let className = 'success';
+    let emoji = '✅';
+    switch(status) {
+        case 'error':
+            className = 'error';
+            emoji = '❌';
+            break;
+        case 'perfect':
+            emoji = '🎉';
+            break;
+        case 'good':
+            emoji = '👍';
+            break;
+        case 'okay':
+            emoji = '👌';
+            break;
+        case 'needs_work':
+            emoji = '🤔';
+            className = 'error';
+            break;
+        case 'try_again':
+            emoji = '💪';
+            className = 'error';
+            break;
+    }
+    resultDiv.innerHTML = `<div class="${className}">${emoji} ${message}</div>`;
+}
+
+
+
+function updatePreview(html) {
+    const previewDiv = document.getElementById('preview');
+    const previewCard = document.getElementById('previewCard');
+    previewDiv.innerHTML = html;
+    previewCard.style.display = 'block';
+}
+
+
+
+// Auto-preview när användaren skriver
+document.getElementById('htmlInput').addEventListener('input', function() {
+    const html = this.value;
+    if (html.trim()) {
+        updatePreview(html);
+    }
+});
+</script>
+{% endblock %}

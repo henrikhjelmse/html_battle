@@ -1,0 +1,19 @@
+[
+  {
+    "id": 2,
+    "html": "<h1>Min första HTML‑sida</h1>\r\n<p>Detta är ett exempel på ett stycke. Här kan du skriva vanlig brödtext.\r\nOm du vill betona något kan du använda <b>fetstil</b> så här.\r\n</p>",
+    "hint": "<h1> <p> <b>",
+    "made_by": "admin"
+  },
+  {
+    "id": 3,
+    "html": "<h1>Välkommen till min sida</h1>\r\n\r\n  <p>Här är en bild:</p>\r\n\r\n  <img src=\"https://picsum.photos/200/300\">\r\n\r\n  <p>https://picsum.photos/200/300 är länken i bild taggen</p>",
+    "hint": "",
+    "made_by": "superadmin"
+  },
+  {
+    "id": 1,
+    "html": "<div>\r\n    <h1>Min hemsida</h1>\r\n    <p>Välkommen till min enkla hemsida.</p>\r\n  </div>\r\n\r\n  <div>\r\n    <h2>Om mig</h2>\r\n    <p>Jag gillar att <b>koda</b> och lära mig nya saker.</p>\r\n  </div>\r\n\r\n  <div>\r\n    <h2>Min favoritbild</h2>\r\n    <img src=\"https://placebear.com/300/200\">\r\n    <p>Här är en bild på en björn. <b>Cool va?</b>https://placebear.com/300/200 är bilden</p>\r\n  </div>",
+    "hint": "första div: är det h1. andra och tredje är det h2"
+  }
+]
